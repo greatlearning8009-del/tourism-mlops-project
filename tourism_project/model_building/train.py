@@ -29,19 +29,19 @@ api = HfApi()
 # --------------------------------------------------
 
 Xtrain = pd.read_csv(
-    "hf://datasets/jyotibudharapu/tourism/Xtrain.csv"
+    "hf://datasets/SRGL/tourism/Xtrain.csv"
 )
 
 Xtest = pd.read_csv(
-    "hf://datasets/jyotibudharapu/tourism/Xtest.csv"
+    "hf://datasets/SRGL/tourism/Xtest.csv"
 )
 
 ytrain = pd.read_csv(
-    "hf://datasets/jyotibudharapu/tourism/ytrain.csv"
+    "hf://datasets/SRGL/tourism/ytrain.csv"
 ).squeeze()
 
 ytest = pd.read_csv(
-    "hf://datasets/jyotibudharapu/tourism/ytest.csv"
+    "hf://datasets/SRGL/tourism/ytest.csv"
 ).squeeze()
 
 print("Training data loaded successfully.")
@@ -171,7 +171,7 @@ with mlflow.start_run():
     # Upload to Hugging Face Model Hub
     # --------------------------------------------------
 
-    repo_id = "jyotibudharapu/tourism-model"
+    repo_id = "SRGL/tourism-model"
 
     try:
         api.repo_info(

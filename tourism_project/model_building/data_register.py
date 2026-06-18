@@ -3,7 +3,7 @@ from huggingface_hub import HfApi, create_repo
 import os
 
 
-repo_id = "jyotibudharapu/tourism"
+repo_id = "SRGL/tourism"
 repo_type = "dataset"
 
 # Initialize API client

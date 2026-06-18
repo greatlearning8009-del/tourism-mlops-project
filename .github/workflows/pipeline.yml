@@ -1,112 +1,115 @@
 name: Tourism Project Pipeline
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
 
-register-dataset:
-runs-on: ubuntu-latest
+  register-dataset:
+    name: Register Dataset
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - uses: actions/checkout@v3
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - name: Set up Python
-    uses: actions/setup-python@v4
-    with:
-      python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Install Dependencies
-    run: |
-      pip install -r tourism_project/deployment/requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tourism_project/deployment/requirements.txt
 
-  - name: Upload Dataset to Hugging Face Hub
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-    run: |
-      python tourism_project/model_building/data_register.py
-```
+      - name: Upload Dataset to Hugging Face Hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Uploading dataset..."
+          python tourism_project/model_building/data_register.py
 
-data-prep:
-needs: register-dataset
-runs-on: ubuntu-latest
+  data-prep:
+    name: Data Preparation
+    needs: register-dataset
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - uses: actions/checkout@v3
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - name: Set up Python
-    uses: actions/setup-python@v4
-    with:
-      python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Install Dependencies
-    run: |
-      pip install -r tourism_project/deployment/requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tourism_project/deployment/requirements.txt
 
-  - name: Run Data Preparation
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-    run: |
-      python tourism_project/model_building/prep.py
-```
+      - name: Run Data Preparation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Running data preparation..."
+          python tourism_project/model_building/prep.py
 
-model-training:
-needs: data-prep
-runs-on: ubuntu-latest
+  model-training:
+    name: Train Model
+    needs: data-prep
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - uses: actions/checkout@v3
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - name: Set up Python
-    uses: actions/setup-python@v4
-    with:
-      python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Install Dependencies
-    run: |
-      pip install -r tourism_project/deployment/requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tourism_project/deployment/requirements.txt
 
-  - name: Start MLflow Server
-    run: |
-      nohup mlflow ui --host 0.0.0.0 --port 5000 &
-      sleep 10
+      - name: Train Model
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Training model..."
+          python tourism_project/model_building/train.py
 
-  - name: Train Model
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-    run: |
-      python tourism_project/model_building/train.py
-```
+  deploy-hosting:
+    name: Deploy to Hugging Face Space
+    needs:
+      - register-dataset
+      - data-prep
+      - model-training
+    runs-on: ubuntu-latest
 
-deploy-hosting:
-needs:
-- register-dataset
-- data-prep
-- model-training
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-```
-runs-on: ubuntu-latest
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-steps:
-  - uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tourism_project/deployment/requirements.txt
 
-  - name: Set up Python
-    uses: actions/setup-python@v4
-    with:
-      python-version: "3.11"
-
-  - name: Install Dependencies
-    run: |
-      pip install -r tourism_project/deployment/requirements.txt
-
-  - name: Push files to Hugging Face Space
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-    run: |
-      python tourism_project/hosting/hosting.py
-```
+      - name: Deploy Application
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          echo "Deploying to Hugging Face Space..."
+          python tourism_project/hosting/hosting.py
